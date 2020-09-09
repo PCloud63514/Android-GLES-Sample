@@ -5,10 +5,10 @@ import android.opengl.GLSurfaceView
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-class BaseRenderer(): GLSurfaceView.Renderer {
-    private var _baseShape:BaseShape?
+class MyRenderer(): GLSurfaceView.Renderer {
+    private var _baseShape:MyShape?
     init {
-        _baseShape = BaseShape()
+        _baseShape = MyShape()
     }
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         GLES20.glClearColor(0.4f, 0.4f, 0.4f, 0.4f)

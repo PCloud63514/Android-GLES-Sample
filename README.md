@@ -14,6 +14,7 @@ Java와 Kotlin 모두 작성해본 결과 코드 작성에 큰 차이는 없습�
 2. [OpenGLES 환경 구성](#opengles-환경-구성)
    1. [Manifest](#manifest)
    2. [GLSurfaceView](#glsurfaceview)
+   3. [GLSurfaceView.Renderer](#glsurfaceview.renderer)
 
 ### 기본 개념
 
@@ -84,3 +85,76 @@ Application에서 OpenGLES 2.0 API를 사용한 다는 것을 명시하기 위�
 #### GLSurfaceView
 
 ---
+
+GLSurfaceView Class는 OpenGL API호출을 사용하여 그래픽을 보여줄 View입니다.
+
+기본적으로 [Renderer](#glsurfaceview.renderer)를 추가하여야 하며, Touch Event관련 기능을 여기서 추가할 수 있습니다.
+
+**EGL Config**
+
+```
+그래픽을 표현할 채널 수와 각 채널에 할당된 bit 정보가 작성되어있습니다. 
+별도의 설정이 없다면 GLSurfaceView는 최소 16bit depth buffer와 PixelFormat.RGB888 정보가 작성된 EGL Config 를 사용합니다.
+```
+
+
+
+**구현**
+
+```kotlin
+import android.opengl.GLSurfaceView;
+class MyGLView(context: Context): GLSurfaceView(context) {
+    private var myGLRenderer:MyGLRenderer?
+    init {
+        setEGLContextClientVersion(2)
+        myGLRenderer = MyGLRenderer()
+        setRenderer(myGLRenderer)
+        renderMode = RENDERMODE_CONTINUOUSLY
+    }
+}
+```
+
+
+
+**[필수]**
+
+| In Code                                        | 설명                                                         |
+| :--------------------------------------------- | ------------------------------------------------------------ |
+| setEGLContextClientVersion(Int)                | EGLContext Client Version을 지정합니다.<br />내부 동작에서 EGLContextFactory 및 EGLConfigChooser에 버전을 알리고 각 인스턴스를 생성하기 때문에 단순히 Version을 명시하는 메소드는 아닙니다. |
+| setRenderer(glRenderer:GLSurfaceView.Renderer) | 현재 GLSurfaceView의 Renderer를 설정합니다.                  |
+
+
+
+**[선택사항]**
+
+| In Code                                                      | 설명                                                         |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| preserveEGLContextOnPause = Boolean                          | Rendering Thread를 일시 중지하고 EGLContext 값을 축소합니다. |
+| setEGLConfigChooser(needDepth:Boolean or configChooser:GLSurfaceView.EGLConfigChooser) | EGLConfig 을 선택하는 메서드 입니다. 보통 직접 호출할 일이 없고, 위에 EGLConfig 설명에 작성된 정보 외의 설정이 필요할 경우 지정하면 됩니다. |
+| holder.setFormat(PixelFormat.TRANSLUCENT or PixelFormat.TRANSPARENT) | GLSurfaceView의 구성 표면을 가져오는 대상을 설정할 수 있습니다.<br />**PixelFormat.TRANSLUCENT**<br />- GLSurfaceView의 배경이 투명해야할 경우 설정할 수 있습니다.<br />**PixelFormat.TRANSPARENT**<br />- 별도의 설정할 필요가 없습니다. |
+| rederMode = RENDERMODE_CONTINUOUSLY or RENDERMODE_WHEN_DIRTY | Rendering Mode를 설정합니다. <br />**RENDERMODE_CONTINUOUSLY**<br />- 반복적으로 랜더링을 진행합니다. 즉 draw() 메서드가 계속 호출되어 비동기적으로 변화해야하는 대상에 적합합니다.<br />**RENDERMODE_WHEN_DIRTY**<br />- View의 업데이트가 필요 없을 때 적합한 Mode입니다. GPU와 CPU의 지속적인 연산이 없으므로 배터리 및 시스템 성능 향상을 확인할 수 있습니다. <br />만약 RENDERMODE_WHEN_DIRTY 상태에서 View를 업데이트 하려는 경우 requestRender() 메서드를 호출하면 됩니다. |
+| isFocusableInTouchMode = Boolean                             | GLSurfaceView가 Touch Event를 발생시킬 수 있습니다.          |
+| requestRender()                                              | GLSurfaceVIew를 Update합니다.                                |
+|                                                              |                                                              |
+
+
+
+
+
+[참고문헌] [GLSurfaceView | Android Developer](https://developer.android.com/reference/android/opengl/GLSurfaceView)
+
+#### GLSurfaceView.Renderer
+
+---
+
+GLSurfaceView.Renderer Interface는 GLSurfaceView에 그래픽을 그릴 때 필요한 메서드를 정의합니다.
+
+구현할 메소드는 아래와 같습니다.
+
+- onSurfaceCreate(gl: GL10?, confing: EGLConfig?): GLSurfaceView를 만들 때 호출됩니다. 시스템 동작에서 단 한번만 호출되어야하는(그래픽 객체 초기화, 매개변수 설정 등) 작업을 작성하면 됩니다. 
+
+- onSurfaceChanged(gl:GL10?, width:Int, height:Int):  GLSurfaceView의 크기 변경, Device의 화면 방향 변경, 도형 변경이 발생할 때 호출되는 메서드 입니다.
+
+- onDrawFrame(gl:GL10?): GLSurfaceView를 그릴 때마다 호출되는 메서드입니다. 그래픽 객체 그리기의 기본 실행지점으로 사용합니다.
+
+  

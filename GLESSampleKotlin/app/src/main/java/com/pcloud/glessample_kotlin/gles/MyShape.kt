@@ -1,6 +1,6 @@
 package com.pcloud.glessample_kotlin.gles
 
-class BaseShape {
+class MyShape {
 
     public fun draw() {
 
