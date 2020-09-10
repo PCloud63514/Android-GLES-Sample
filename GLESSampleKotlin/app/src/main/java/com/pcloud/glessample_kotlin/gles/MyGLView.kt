@@ -12,8 +12,9 @@ class MyGLView(context: Context): GLSurfaceView(context) {
         holder.setFormat(PixelFormat.TRANSLUCENT)
         _myRenderer = MyRenderer()
         setRenderer(_myRenderer)
+
         renderMode = RENDERMODE_WHEN_DIRTY
-        isFocusableInTouchMode = true
+//        isFocusableInTouchMode = true
         requestRender()
     }
 }
